@@ -4,8 +4,9 @@ import com.hamada.walletservice.entity.Transaction;
 import com.hamada.walletservice.entity.TransactionType;
 import com.hamada.walletservice.entity.User;
 import com.hamada.walletservice.exception.ResourceNotFoundException;
-import com.hamada.walletservice.repository.TransactionRepository;
+//import com.hamada.walletservice.repository.TransactionRepository;
 import com.hamada.walletservice.repository.UserRepository;
+import com.hamada.walletservice.service.TransactionService;
 import com.hamada.walletservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @Override
     public User createUser(User user) {
@@ -72,7 +73,7 @@ public class UserServiceImpl implements UserService {
         transaction.setAmount(amount);
         transaction.setType(TransactionType.WITHDRAW);
         transaction.setTimestamp(LocalDateTime.now());
-        transactionRepository.save(transaction);
+        transactionService.saveTransaction(transaction);
         return userRepository.save(hamada);
     }
 
@@ -85,7 +86,7 @@ public class UserServiceImpl implements UserService {
         transaction.setAmount(amount);
         transaction.setType(TransactionType.DEPOSIT);
         transaction.setTimestamp(LocalDateTime.now());
-        transactionRepository.save(transaction);
+        transactionService.saveTransaction(transaction);
         return userRepository.save(hemeda);
     }
 }
