@@ -1,8 +1,6 @@
 package com.hamada.walletservice.controller;
 
-import com.hamada.walletservice.dto.CreateUserRequest;
-import com.hamada.walletservice.dto.DepositRequest;
-import com.hamada.walletservice.dto.WithdrawRequest;
+import com.hamada.walletservice.dto.*;
 import com.hamada.walletservice.entity.User;
 import com.hamada.walletservice.service.UserService;
 import jakarta.validation.Valid;
@@ -18,11 +16,12 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public User createUser(@Valid @RequestBody CreateUserRequest request){
+    public User createUser(@Valid @RequestBody RegisterUserRequest request){
         User user=new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setBalance(request.getBalance());
+        user.setBalance(0.0);
+        user.setPassword(request.getPassword());
         return userService.createUser(user);
     }
 
@@ -58,5 +57,15 @@ public class UserController {
     @PostMapping("/{id}/withdraw")
     public User withdraw(@PathVariable Long id, @Valid @RequestBody WithdrawRequest request){
         return userService.withdraw(id,request.getAmount());
+    }
+
+    @PostMapping("/login")
+    public Boolean login(@Valid @RequestBody LoginRequest request){
+         if(userService.login(request.getEmail(), request.getPassword())){
+             return true;
+         }
+         else {
+             throw new RuntimeException("Incorrect password");
+         }
     }
 }

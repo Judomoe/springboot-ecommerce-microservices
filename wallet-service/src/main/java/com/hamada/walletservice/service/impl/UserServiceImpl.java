@@ -8,7 +8,9 @@ import com.hamada.walletservice.exception.ResourceNotFoundException;
 import com.hamada.walletservice.repository.UserRepository;
 import com.hamada.walletservice.service.TransactionService;
 import com.hamada.walletservice.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,12 +24,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public User createUser(User user) {
         boolean heh=userRepository.existsByEmail(user.getEmail());
         if(heh){
             throw new RuntimeException("Email already exists");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -50,15 +56,16 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id,User user){
         User hamada=userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User does not exist"));
 
-        if(userRepository.existsByEmail(user.getEmail())){
-            throw new RuntimeException("Email already exists");
-        }
+//        if(userRepository.existsByEmail(user.getEmail())){
+//            throw new RuntimeException("Email already exists");
+//        }
         hamada.setName(user.getName());
         hamada.setEmail(user.getEmail());
         hamada.setBalance(user.getBalance());
         return userRepository.save(hamada);
     }
 
+    @Transactional
     @Override
     public User withdraw(Long id, Double amount){
         User hamada=userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User does not exist"));
@@ -77,6 +84,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(hamada);
     }
 
+    @Transactional
     @Override
     public User deposit(Long id, Double amount){
         User hemeda=userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User does not exist"));
@@ -88,5 +96,12 @@ public class UserServiceImpl implements UserService {
         transaction.setTimestamp(LocalDateTime.now());
         transactionService.saveTransaction(transaction);
         return userRepository.save(hemeda);
+    }
+
+    @Override
+    public Boolean login(String email, String password){
+        User hamada=userRepository.findUserByEmail(email).orElseThrow(()->new ResourceNotFoundException("Email not found"));
+        Boolean nateega=passwordEncoder.matches(password,hamada.getPassword());
+        return nateega;
     }
 }

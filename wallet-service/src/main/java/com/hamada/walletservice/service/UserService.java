@@ -12,4 +12,5 @@ public interface UserService {
     User updateUser(Long id, User user);
     User withdraw(Long id, Double amount);
     User deposit(Long id, Double amount);
+    Boolean login(String email,String password);
 }
