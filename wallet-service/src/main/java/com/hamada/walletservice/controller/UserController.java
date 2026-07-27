@@ -60,12 +60,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Boolean login(@Valid @RequestBody LoginRequest request){
-         if(userService.login(request.getEmail(), request.getPassword())){
-             return true;
-         }
-         else {
-             throw new RuntimeException("Incorrect password");
-         }
+    public LoginResponse login(@Valid @RequestBody LoginRequest request){
+        return new LoginResponse(userService.login(request.getEmail(), request.getPassword()));
     }
 }

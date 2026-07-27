@@ -27,6 +27,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtServiceImpl jwtService;
+
     @Override
     public User createUser(User user) {
         boolean heh=userRepository.existsByEmail(user.getEmail());
@@ -99,9 +102,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean login(String email, String password){
+    public String login(String email, String password){
         User hamada=userRepository.findUserByEmail(email).orElseThrow(()->new ResourceNotFoundException("Email not found"));
-        Boolean nateega=passwordEncoder.matches(password,hamada.getPassword());
-        return nateega;
+        boolean nateega=passwordEncoder.matches(password,hamada.getPassword());
+        if(nateega) {
+            return jwtService.generateToken(hamada);
+        }
+        throw new RuntimeException("incorrect email or password");
     }
 }
