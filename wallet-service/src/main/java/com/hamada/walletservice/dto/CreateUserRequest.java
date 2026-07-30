@@ -1,5 +1,6 @@
 package com.hamada.walletservice.dto;
 
+import com.hamada.walletservice.entity.Wallet;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -12,16 +13,18 @@ public class CreateUserRequest {
     @Email
     private String email;
 
-    @PositiveOrZero
-    private Double balance;
+//    @PositiveOrZero
+//    private Double balance;
+    private Wallet wallet;
 
     public CreateUserRequest() {
     }
 
-    public CreateUserRequest(String name, String email, Double balance) {
+    public CreateUserRequest(String name, String email, Wallet wallet) {
         this.name = name;
         this.email = email;
-        this.balance = balance;
+//        this.balance = balance;
+        this.wallet=wallet;
     }
 
     public String getName() {
@@ -40,11 +43,20 @@ public class CreateUserRequest {
         this.email = email;
     }
 
-    public Double getBalance() {
-        return balance;
+//    public Double getBalance() {
+//        return balance;
+//    }
+//
+//    public void setBalance(Double balance) {
+//        this.balance = balance;
+//    }
+
+
+    public Wallet getWallet() {
+        return wallet;
     }
 
-    public void setBalance(Double balance) {
-        this.balance = balance;
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }

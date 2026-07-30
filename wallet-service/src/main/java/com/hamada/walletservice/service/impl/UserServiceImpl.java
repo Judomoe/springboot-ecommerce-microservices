@@ -3,6 +3,7 @@ package com.hamada.walletservice.service.impl;
 import com.hamada.walletservice.entity.Transaction;
 import com.hamada.walletservice.entity.TransactionType;
 import com.hamada.walletservice.entity.User;
+import com.hamada.walletservice.entity.Wallet;
 import com.hamada.walletservice.exception.ResourceNotFoundException;
 //import com.hamada.walletservice.repository.TransactionRepository;
 import com.hamada.walletservice.repository.UserRepository;
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
 //        }
         hamada.setName(user.getName());
         hamada.setEmail(user.getEmail());
-        hamada.setBalance(user.getBalance());
+        hamada.setWallet(user.getWallet());
         return userRepository.save(hamada);
     }
 
@@ -72,17 +73,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User withdraw(Long id, Double amount){
         User hamada=userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User does not exist"));
-        if(hamada.getBalance()>=amount){
-            hamada.setBalance(hamada.getBalance()-amount);
+        Wallet wallet=hamada.getWallet();
+        if(wallet.getBalance()>=amount){
+            wallet.setBalance(wallet.getBalance()-amount);
         }
         else{
             throw new RuntimeException("Balance not enough");
         }
         Transaction transaction=new Transaction();
-        transaction.setUser(hamada);
+        transaction.setWallet(wallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.WITHDRAW);
         transaction.setTimestamp(LocalDateTime.now());
+
         transactionService.saveTransaction(transaction);
         return userRepository.save(hamada);
     }
@@ -91,9 +94,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User deposit(Long id, Double amount){
         User hemeda=userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User does not exist"));
-        hemeda.setBalance(hemeda.getBalance()+amount);
+        Wallet wallet=hemeda.getWallet();
+        wallet.setBalance(wallet.getBalance()+amount);
         Transaction transaction=new Transaction();
-        transaction.setUser(hemeda);
+        transaction.setWallet(wallet);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.DEPOSIT);
         transaction.setTimestamp(LocalDateTime.now());
@@ -109,5 +113,10 @@ public class UserServiceImpl implements UserService {
             return jwtService.generateToken(hamada);
         }
         throw new RuntimeException("incorrect email or password");
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findUserByEmail(email).orElseThrow(()->new ResourceNotFoundException("Email not found"));
     }
 }

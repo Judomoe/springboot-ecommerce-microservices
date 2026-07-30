@@ -15,19 +15,23 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
     private LocalDateTime timestamp;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id")
+//    private User user;
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "wallet_id")
+    private Wallet wallet;
+
 
     public Transaction() {
     }
 
-    public Transaction(Long id, Double amount, TransactionType type, LocalDateTime timestamp, User user) {
+    public Transaction(Long id, Double amount, TransactionType type, LocalDateTime timestamp, Wallet wallet) {
         this.id = id;
         this.amount = amount;
         this.type = type;
         this.timestamp = timestamp;
-        this.user = user;
+        this.wallet = wallet;
     }
 
     public Long getId() {
@@ -62,11 +66,20 @@ public class Transaction {
         this.timestamp = timestamp;
     }
 
-    public User getUser() {
-        return user;
+    public Wallet getWallet() {
+        return wallet;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
+
+//    public User getUser() {
+//        return user;
+//    }
+//
+//    public void setUser(User user) {
+//        this.user = user;
+//    }
+
 }

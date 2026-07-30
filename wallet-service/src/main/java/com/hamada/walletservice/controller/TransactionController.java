@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @GetMapping("/{userId}/transactions")
-    public List<Transaction> getTransactionsByUser(@PathVariable Long userId){
-        return transactionService.getTransactionsByUser(userId);
+    @GetMapping("wallets/{walletId}/transactions")
+    public List<Transaction> getTransactionsByUser(@PathVariable Long walletId){
+        return transactionService.getTransactionsByWallet(walletId);
     }
 }

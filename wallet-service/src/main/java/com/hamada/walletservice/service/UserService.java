@@ -13,4 +13,6 @@ public interface UserService {
     User withdraw(Long id, Double amount);
     User deposit(Long id, Double amount);
     String login(String email,String password);
+
+    User findByEmail(String email);
 }

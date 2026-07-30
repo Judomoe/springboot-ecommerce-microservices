@@ -2,6 +2,7 @@ package com.hamada.walletservice.controller;
 
 import com.hamada.walletservice.dto.*;
 import com.hamada.walletservice.entity.User;
+import com.hamada.walletservice.entity.Wallet;
 import com.hamada.walletservice.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,14 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody RegisterUserRequest request){
+        System.out.println("CREATE USER CALLED");
         User user=new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setBalance(0.0);
+        Wallet wallet=new Wallet();
+        wallet.setUser(user);
+        wallet.setBalance(0.0);
+        user.setWallet(wallet);
         user.setPassword(request.getPassword());
         return userService.createUser(user);
     }
@@ -45,7 +50,7 @@ public class UserController {
         User user=new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setBalance(request.getBalance());
+        user.setWallet(request.getWallet());
         return userService.updateUser(id,user);
     }
 
