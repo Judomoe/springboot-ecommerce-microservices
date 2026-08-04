@@ -1,9 +1,14 @@
 package com.hamada.shopservice.service.impl;
 
+import com.hamada.shopservice.client.InventoryClient;
 import com.hamada.shopservice.entity.Order;
+import com.hamada.shopservice.entity.OrderItem;
 import com.hamada.shopservice.entity.OrderStatus;
 import com.hamada.shopservice.repository.OrderRepository;
+import com.hamada.shopservice.service.OrderItemService;
 import com.hamada.shopservice.service.OrderService;
+import com.hamada.shopservice.service.ProductService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +18,9 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private InventoryClient inventoryClient;
 
     @Override
     public List<Order> getAllOrders() {
@@ -24,10 +32,30 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(id).orElseThrow(()->new RuntimeException("Order not found"));
     }
 
+
+    @Transactional
     @Override
     public Order createOrder(Order order) {
+        if(order.getOrderItem()==null){
+            throw new RuntimeException("NULLLLLLL");
+        }
+        for(OrderItem orderItem:order.getOrderItem()){
+            Long productId=orderItem.getProduct().getId();
+            String name=orderItem.getProduct().getName();
+            int quantity=orderItem.getQuantity();
+            if(inventoryClient.hasStock(productId,quantity)){
+                inventoryClient.reserveStock(productId,quantity);
+            }
+            else{
+                throw new RuntimeException("Insufficient stock for product: "+name);
+            }
+            orderItem.setOrder(order);
+        }
+        order.setStatus(OrderStatus.PENDING);
         return orderRepository.save(order);
     }
+
+
 
     @Override
     public Order updateOrder(Long id, Order order) {
@@ -50,5 +78,37 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> getOrderByStatus(OrderStatus status) {
         return orderRepository.findOrderByStatus(status);
+    }
+
+    @Transactional
+    @Override
+    public Order confirmOrder(Long orderId) {
+        Order order=orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Only pending orders can be confirmed");
+        }
+        for (OrderItem orderItem : order.getOrderItem()) {
+            Long productId = orderItem.getProduct().getId();
+            int quantity = orderItem.getQuantity();
+            inventoryClient.confirmStock(productId, quantity);
+        }
+        order.setStatus(OrderStatus.PAID);
+        return orderRepository.save(order);
+    }
+
+    @Transactional
+    @Override
+    public Order cancelOrder(Long orderId) {
+        Order order=orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Only pending orders can be canceled");
+        }
+        for (OrderItem orderItem : order.getOrderItem()) {
+            Long productId = orderItem.getProduct().getId();
+            int quantity = orderItem.getQuantity();
+            inventoryClient.releaseStock(productId, quantity);
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        return orderRepository.save(order);
     }
 }

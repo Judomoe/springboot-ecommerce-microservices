@@ -20,4 +20,8 @@ public interface OrderService {
     List<Order> getOrderByUserId(Long userId);
 
     List<Order> getOrderByStatus(OrderStatus status);
+
+    Order confirmOrder(Long orderId);
+
+    Order cancelOrder(Long orderId);
 }

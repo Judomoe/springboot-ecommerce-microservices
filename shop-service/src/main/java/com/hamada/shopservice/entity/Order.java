@@ -1,6 +1,7 @@
 package com.hamada.shopservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hamada.shopservice.entity.OrderStatus;
 import jakarta.persistence.*;
 
@@ -22,8 +23,9 @@ public class Order {
     @OneToOne
     @JoinColumn(name = "payment_id")
     private Payment payment;
+//    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<OrderItem> orderItem;
 
     public Order() {
