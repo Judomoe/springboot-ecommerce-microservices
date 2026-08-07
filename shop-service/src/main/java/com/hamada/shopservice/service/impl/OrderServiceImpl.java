@@ -8,6 +8,7 @@ import com.hamada.shopservice.repository.OrderRepository;
 import com.hamada.shopservice.service.OrderItemService;
 import com.hamada.shopservice.service.OrderService;
 import com.hamada.shopservice.service.ProductService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(id).orElseThrow(()->new RuntimeException("Order not found"));
     }
 
-
+    @CircuitBreaker(name = "inventoryService", fallbackMethod = "createOrderFallback")
     @Transactional
     @Override
     public Order createOrder(Order order) {
@@ -53,6 +54,12 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setStatus(OrderStatus.PENDING);
         return orderRepository.save(order);
+    }
+
+    public Order createOrderFallback(Order order, Exception ex) {
+        throw new RuntimeException(
+                "Inventory service is currently unavailable. Please try again later."
+        );
     }
 
 
@@ -80,6 +87,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findOrderByStatus(status);
     }
 
+    @CircuitBreaker(name = "inventoryService", fallbackMethod = "createOrderFallback")
     @Transactional
     @Override
     public Order confirmOrder(Long orderId) {
@@ -96,6 +104,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
+    @CircuitBreaker(name = "inventoryService", fallbackMethod = "createOrderFallback")
     @Transactional
     @Override
     public Order cancelOrder(Long orderId) {
